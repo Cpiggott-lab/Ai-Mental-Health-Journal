@@ -1,32 +1,16 @@
-@import "tailwindcss";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
+/* Define your CSS variables */
 :root {
   --background: #d9d9d9;
   --foreground: #040404;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-html,
-body {
-  height: 100%;
-}
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: var(--background);
-  color: var(--foreground);
-}
+/* Dark mode preference (can be customized later) */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #d9d9d9;
@@ -34,8 +18,18 @@ body {
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tailwind-safe base layer overrides */
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
+  }
+
+  html,
+  body {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-[--background] text-[--foreground] font-sans;
+  }
 }
