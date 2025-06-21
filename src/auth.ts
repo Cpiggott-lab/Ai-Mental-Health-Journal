@@ -1,29 +1,43 @@
-import { AuthOptions, getServerSession } from "next-auth";
-import Github from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
+import { getServerSession } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GitHubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
+import type { NextAuthOptions, Session } from "next-auth";
+import { prisma } from "@/lib/prisma";
 
-const authOptions: AuthOptions = {
-  // Configure one or more authentication providers
+// Optional: Validate environment variables early
+if (!process.env.AUTH_GOOGLE_ID || !process.env.AUTH_GOOGLE_SECRET) {
+  throw new Error("Missing Google OAuth environment variables");
+}
+if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
+  throw new Error("Missing GitHub OAuth environment variables");
+}
+
+// Extend the Session type to include the 'id' property
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt", // use JWT so we can easily extend session data
+  },
   providers: [
-    Github({
-      clientId: process.env.AUTH_GITHUB_ID || "",
-      clientSecret:
-        process.env.AUTH_GITHUB_SECRET ||
-        (() => {
-          throw new Error("GITHUB_SECRET is not defined");
-        })(),
+    GitHubProvider({
+      clientId: process.env.AUTH_GITHUB_ID!,
+      clientSecret: process.env.AUTH_GITHUB_SECRET!,
     }),
-    Google({
-      clientId:
-        process.env.AUTH_GOOGLE_ID ||
-        (() => {
-          throw new Error("GOOGLE_ID is not defined");
-        })(),
-      clientSecret:
-        process.env.AUTH_GOOGLE_SECRET ||
-        (() => {
-          throw new Error("GOOGLE_SECRET is not defined");
-        })(),
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
       authorization: {
         params: {
           prompt: "consent",
@@ -33,12 +47,21 @@ const authOptions: AuthOptions = {
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-/**
- * Helper function to get the session on the server without having to import the authOptions object every single time
- * @returns The session object or null
- */
-const getSession = () => getServerSession(authOptions);
-
-export { authOptions, getSession };
+export const getSession = async () => await getServerSession(authOptions);
