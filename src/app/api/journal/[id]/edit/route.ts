@@ -37,5 +37,5 @@ export async function POST(
     data: { content },
   });
 
-  return NextResponse.redirect(`/journal/${params.id}`);
+  return NextResponse.redirect(new URL(`/journal/${params.id}`, req.url)); // ✅ FIXED
 }
