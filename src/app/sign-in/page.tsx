@@ -14,31 +14,38 @@ export default function SignInPage() {
   const handleSubmit = async () => {
     setError("");
 
-    // Handle registration
-    if (isRegistering) {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+    try {
+      // If registering, hit the register endpoint first
+      if (isRegistering) {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || "Registration failed");
+        }
+      }
+
+      // Then attempt to sign in
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
 
-      if (!res.ok) {
-        const msg = await res.text();
-        return setError(msg);
+      console.log("signIn result:", result);
+
+      if (result?.ok) {
+        router.push("/");
+      } else {
+        setError("Invalid credentials or login failed.");
       }
-    }
-
-    // Then sign in
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.ok) {
-      router.push("/journal");
-    } else {
-      setError("Invalid credentials");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     }
   };
 
@@ -50,13 +57,13 @@ export default function SignInPage() {
 
       <div className="space-y-4 w-full max-w-sm">
         <button
-          onClick={() => signIn("github")}
+          onClick={() => signIn("github", { callbackUrl: "/" })}
           className="w-full bg-zinc-800 text-white px-4 py-2 rounded hover:bg-zinc-700"
         >
           Sign in with GitHub
         </button>
         <button
-          onClick={() => signIn("google")}
+          onClick={() => signIn("google", { callbackUrl: "/" })}
           className="w-full bg-white text-black border px-4 py-2 rounded hover:bg-gray-100"
         >
           Sign in with Google
