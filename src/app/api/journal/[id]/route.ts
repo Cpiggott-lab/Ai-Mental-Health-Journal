@@ -1,42 +1,38 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+// src/app/api/journal/[id]/route.ts
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export async function DELETE(
-  request: Request,
+export async function GET(
+  req: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    // Ensure the entry belongs to the logged-in user
     const entry = await prisma.journalEntry.findUnique({
       where: { id: params.id },
       include: { user: true },
     });
 
-    if (!entry || entry.user.email !== session.user.email) {
-      return NextResponse.json(
-        { error: "Not found or not authorized" },
-        { status: 404 }
-      );
+    if (!entry) {
+      return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
 
+    return NextResponse.json(entry);
+  } catch (err) {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
     await prisma.journalEntry.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json({ message: "Entry deleted" });
-  } catch (error) {
-    console.error("DELETE /api/journal/[id] error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+  } catch (err) {
+    return NextResponse.json({ error: "Deletion failed" }, { status: 500 });
   }
 }

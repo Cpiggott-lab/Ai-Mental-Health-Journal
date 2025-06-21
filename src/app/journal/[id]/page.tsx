@@ -1,28 +1,42 @@
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { notFound } from "next/navigation";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import ConfirmModal from "@/components/ConfirmModal";
 
-export default async function SingleJournalEntry({
-  params,
+export default function SingleJournalEntry({
+  params: paramsPromise,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const params = use(paramsPromise); // 👈 unwraps the actual { id: string }
+  const router = useRouter();
+  const [entry, setEntry] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
 
-  if (!session?.user?.email) {
-    return notFound();
-  }
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(`/api/journal/${params.id}`);
+      const data = await res.json();
+      setEntry(data);
+    })();
+  }, [params.id, router]);
 
-  const entry = await prisma.journalEntry.findUnique({
-    where: { id: params.id },
-    include: { user: true },
-  });
+  const handleDelete = async () => {
+    const res = await fetch(`/api/journal/${params.id}`, {
+      method: "DELETE",
+    });
 
-  if (!entry || entry.user.email !== session.user.email) {
-    return notFound();
-  }
+    if (res.ok) {
+      router.push("/journal");
+    } else {
+      alert("Failed to delete entry.");
+    }
+  };
+
+  if (status === "loading" || !entry)
+    return <p className="text-center py-10 text-gray-500">Loading...</p>;
 
   const affirmations = entry.affirmations ? JSON.parse(entry.affirmations) : [];
   const suggestions = entry.suggestions ? JSON.parse(entry.suggestions) : [];
@@ -35,7 +49,6 @@ export default async function SingleJournalEntry({
 
       <p className="text-xl mt-4 whitespace-pre-line">{entry.content}</p>
 
-      {/* AI Analysis Section */}
       {entry.summary && (
         <div className="mt-8 border-t pt-6">
           <h2 className="text-lg font-semibold text-amber-700 mb-2">
@@ -63,12 +76,36 @@ export default async function SingleJournalEntry({
         </div>
       )}
 
-      <Link
-        href={`/journal/${params.id}/edit`}
-        className="mt-6 inline-block text-sm text-blue-600 hover:underline"
-      >
-        Edit this entry
-      </Link>
+      <div className="mt-6 flex gap-4">
+        <Link
+          href={`/journal/${params.id}/edit`}
+          className="inline-block text-sm text-blue-600 hover:underline"
+        >
+          Edit this entry
+        </Link>
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Delete
+        </button>
+
+        <Link
+          href="/journal"
+          className="inline-block text-sm text-gray-600 hover:underline"
+        >
+          ← Back to Journal
+        </Link>
+      </div>
+
+      <ConfirmModal
+        open={showModal}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this journal entry?"
+        onConfirm={handleDelete}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 }

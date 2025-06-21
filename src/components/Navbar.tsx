@@ -3,17 +3,24 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import AuthButtons from "./AuthButtons";
+import { useSession } from "next-auth/react";
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
-  const navLinks = ["about", "journal", "contact"];
+  const navLinks = [
+    { path: "about", label: "About" },
+    ...(session?.user ? [{ path: "journal", label: "Journal" }] : []),
+    { path: "contact", label: "Contact" },
+  ];
 
   return (
-    <header className="bg-amber-100 border-b border-amber-200 shadow-md px-6 py-4">
-      <nav className="max-w-10xl mx-auto flex items-center justify-between">
+    <header className="bg-amber-100 border-b border-amber-200 shadow-md px-5 py-2">
+      <nav className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
@@ -23,20 +30,23 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <ul className="hidden md:flex items-center space-x-2">
-          {navLinks.map((path) => (
-            <li key={path}>
-              <Link
-                href={`/${path}`}
-                className="text-amber-700 font-medium hover:bg-amber-100 px-4 py-2 rounded-full transition-all duration-200"
-              >
-                {path.charAt(0).toUpperCase() + path.slice(1)}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="hidden md:flex items-center space-x-4">
+          <ul className="flex items-center space-x-2">
+            {navLinks.map(({ path, label }) => (
+              <li key={path}>
+                <Link
+                  href={`/${path}`}
+                  className="text-amber-700 font-medium hover:bg-amber-200 px-4 py-2 rounded-full transition"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <AuthButtons />
+        </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Toggle */}
         <button
           onClick={toggleMenu}
           className="md:hidden p-2 text-amber-700 hover:text-amber-900 focus:outline-none"
@@ -46,19 +56,22 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile Dropdown Nav */}
       {isOpen && (
         <div className="md:hidden mt-2 space-y-2 px-4 pb-4">
-          {navLinks.map((path) => (
+          {navLinks.map(({ path, label }) => (
             <Link
               key={path}
               href={`/${path}`}
               onClick={() => setIsOpen(false)}
               className="block text-amber-700 font-medium bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-md transition"
             >
-              {path.charAt(0).toUpperCase() + path.slice(1)}
+              {label}
             </Link>
           ))}
+          <div className="mt-2">
+            <AuthButtons />
+          </div>
         </div>
       )}
     </header>
