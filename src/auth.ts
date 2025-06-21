@@ -100,8 +100,3 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
-
-if (typeof window === "undefined") {
-  console.log("GOOGLE_ID:", process.env.AUTH_GOOGLE_ID);
-  console.log("GOOGLE_SECRET:", process.env.AUTH_GOOGLE_SECRET);
-}

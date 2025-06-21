@@ -13,8 +13,8 @@ export default function Navbar() {
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   const navLinks = [
-    { path: "about", label: "About" },
     ...(session?.user ? [{ path: "journal", label: "Journal" }] : []),
+    { path: "about", label: "About" },
     { path: "contact", label: "Contact" },
   ];
 
@@ -26,7 +26,7 @@ export default function Navbar() {
           href="/"
           className="text-2xl font-bold text-amber-800 tracking-wide"
         >
-          Journal
+          Reflectly AI
         </Link>
 
         {/* Desktop Nav */}
