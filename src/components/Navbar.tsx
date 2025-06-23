@@ -12,11 +12,6 @@ export default function Navbar() {
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
-  const navLinks = [
-    ...(session?.user ? [{ path: "journal", label: "Journal" }] : []),
-    { path: "about", label: "About" },
-  ];
-
   return (
     <header className="bg-amber-100 border-b border-amber-200 shadow-md px-5 py-2">
       <nav className="max-w-7xl mx-auto flex items-center justify-between">
@@ -31,16 +26,16 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-4">
           <ul className="flex items-center space-x-2">
-            {navLinks.map(({ path, label }) => (
-              <li key={path}>
+            {session?.user && (
+              <li>
                 <Link
-                  href={`/${path}`}
+                  href="/journal"
                   className="text-amber-700 font-medium hover:bg-amber-200 px-4 py-2 rounded-full transition"
                 >
-                  {label}
+                  Journal
                 </Link>
               </li>
-            ))}
+            )}
           </ul>
           <AuthButtons />
         </div>
@@ -57,17 +52,16 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Nav */}
       {isOpen && (
-        <div className="md:hidden mt-2 space-y-2 px-4 pb-4">
-          {navLinks.map(({ path, label }) => (
+        <div className="flex justify-center px-4 pb-4 flex-col items-center">
+          {session?.user && (
             <Link
-              key={path}
-              href={`/${path}`}
+              href="/journal"
               onClick={() => setIsOpen(false)}
               className="block text-amber-700 font-medium bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-md transition"
             >
-              {label}
+              Journal
             </Link>
-          ))}
+          )}
           <div className="mt-2">
             <AuthButtons />
           </div>
