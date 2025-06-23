@@ -10,6 +10,7 @@ export default function NewJournalEntry() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Adding in TTS ability for user to enter journal in through voice.
   const handleSave = async () => {
     setError("");
     setLoading(true);

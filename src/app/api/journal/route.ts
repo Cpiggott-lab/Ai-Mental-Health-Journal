@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       summary: analysis.summary,
       affirmations: JSON.stringify(analysis.affirmations),
       suggestions: JSON.stringify(analysis.suggestions),
+      followUps: JSON.stringify(analysis.followUps),
     },
   });
 
