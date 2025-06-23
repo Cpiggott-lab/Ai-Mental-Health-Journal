@@ -10,7 +10,7 @@ export default function SingleJournalEntry({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const params = use(paramsPromise); // 👈 unwraps the actual { id: string }
+  const params = use(paramsPromise);
   const router = useRouter();
   const [entry, setEntry] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
@@ -40,7 +40,8 @@ export default function SingleJournalEntry({
 
   const affirmations = entry.affirmations ? JSON.parse(entry.affirmations) : [];
   const suggestions = entry.suggestions ? JSON.parse(entry.suggestions) : [];
-
+  const followUps = entry.followUps ? JSON.parse(entry.followUps) : [];
+  const mood = entry.mood ? JSON.parse(entry.mood) : null;
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <p className="text-sm text-gray-400">
@@ -55,6 +56,7 @@ export default function SingleJournalEntry({
             Mental Health Summary
           </h2>
           <p className="mb-4">{entry.summary}</p>
+          {/* add in mood */}
 
           <h3 className="text-md font-semibold text-green-700 mb-1">
             Positive Affirmations
@@ -70,6 +72,16 @@ export default function SingleJournalEntry({
           </h3>
           <ul className="list-disc list-inside">
             {suggestions.map((s: string, i: number) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+
+          {/* Follow up questions. */}
+          <h3 className="text-md font-semibold text-purple-700 mt-4">
+            Follow-Up Questions
+          </h3>
+          <ul className="list-disc list-inside">
+            {followUps.map((s: string, i: number) => (
               <li key={i}>{s}</li>
             ))}
           </ul>

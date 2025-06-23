@@ -15,7 +15,6 @@ export default function Navbar() {
   const navLinks = [
     ...(session?.user ? [{ path: "journal", label: "Journal" }] : []),
     { path: "about", label: "About" },
-    { path: "contact", label: "Contact" },
   ];
 
   return (

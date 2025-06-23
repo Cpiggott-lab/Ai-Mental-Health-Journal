@@ -1,3 +1,5 @@
+//confirmation window for actions like delete
+
 "use client";
 
 import React from "react";

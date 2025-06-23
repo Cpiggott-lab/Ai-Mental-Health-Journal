@@ -68,7 +68,10 @@ model JournalEntry {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  summary      String?
-  affirmations String?
-  suggestions  String?
+  summary              String?
+  affirmations         String?
+  suggestions          String?
+  followUps            String?
+  mood                 String?
+  cognitiveDistortions String?
 }
