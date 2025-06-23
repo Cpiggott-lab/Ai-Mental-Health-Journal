@@ -2,6 +2,12 @@
 export default function Spinner() {
   return (
     <div className="flex items-center justify-center mt-6">
+      <span className="text-amber-600 text-lg font-semibold mr-2">
+        Analyzing your entry...
+      </span>
+      <span className="text-amber-600 text-lg font-semibold animate-pulse">
+        Please wait
+      </span>
       <svg
         className="animate-spin h-6 w-6 text-amber-600"
         xmlns="http://www.w3.org/2000/svg"
