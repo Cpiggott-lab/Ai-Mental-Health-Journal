@@ -1,3 +1,5 @@
+// https://www.npmjs.com/package/react-speech-recognition
+
 "use client";
 
 import React from "react";
@@ -32,8 +34,6 @@ export default function VoiceRecorder({
       </p>
     );
   }
-  //   className =
-  //     "bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-500 disabled:opacity-50 transition";
 
   return (
     <div className="flex gap-4 items-center">
