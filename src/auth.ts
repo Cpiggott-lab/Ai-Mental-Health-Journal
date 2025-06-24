@@ -7,13 +7,20 @@ import type { NextAuthOptions } from "next-auth";
 import { prisma } from "@/lib/prisma";
 
 if (typeof window === "undefined") {
-  if (!process.env.AUTH_GOOGLE_ID || !process.env.AUTH_GOOGLE_SECRET)
-    throw new Error("Missing Google OAuth env variables");
+  const requiredEnvVars = [
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET",
+    "AUTH_GITHUB_ID",
+    "AUTH_GITHUB_SECRET",
+    "NEXTAUTH_SECRET",
+    "DATABASE_URL",
+  ];
 
-  if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET)
-    throw new Error("Missing GitHub OAuth env variables");
-
-  if (!process.env.NEXTAUTH_SECRET) throw new Error("Missing NEXTAUTH_SECRET");
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      throw new Error(`Missing required environment variable: ${envVar}`);
+    }
+  });
 }
 
 declare module "next-auth" {
@@ -55,47 +62,69 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
+        try {
+          console.log("Received credentials:", credentials);
+
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Missing email or password");
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
+
+          console.log("Fetched user:", user);
+
+          if (!user || !user.hashedPassword) {
+            throw new Error("No user found or missing hashed password");
+          }
+
+          const isValid = await compare(
+            credentials.password,
+            user.hashedPassword
+          );
+          console.log("Password validation result:", isValid);
+
+          if (!isValid) {
+            throw new Error("Invalid password");
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
+        } catch (error) {
+          console.error("Error in authorize function:", error);
+          throw new Error("Authentication failed");
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user || !user.hashedPassword) {
-          throw new Error("No user found or missing password");
-        }
-
-        const isValid = await compare(
-          credentials.password,
-          user.hashedPassword
-        );
-
-        if (!isValid) {
-          throw new Error("Invalid password");
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+      try {
+        console.log("JWT callback - token:", token, "user:", user);
+        if (user) {
+          token.id = user.id;
+        }
+        return token;
+      } catch (error) {
+        console.error("Error in JWT callback:", error);
+        throw error;
       }
-      return token;
     },
     async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
+      try {
+        console.log("Session callback - session:", session, "token:", token);
+        if (session.user && token.id) {
+          session.user.id = token.id as string;
+        }
+        return session;
+      } catch (error) {
+        console.error("Error in Session callback:", error);
+        throw error;
       }
-      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
