@@ -35,6 +35,7 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
