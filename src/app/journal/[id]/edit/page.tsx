@@ -1,13 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-export default async function EditJournalEntry({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EditJournalEntry({ params }: any) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) return notFound();

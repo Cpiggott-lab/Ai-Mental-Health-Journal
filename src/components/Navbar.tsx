@@ -21,11 +21,13 @@ export default function Navbar() {
           <strong>Reflectly</strong> AI
         </Link>
         <div className="hidden md:block">
-          <img
-            src={HeartImage.src}
-            alt="Reflectly Logo"
-            className="h-10 w-10 rounded-full"
-          />
+          <Link href="/">
+            <img
+              src={HeartImage.src}
+              alt="Reflectly Logo"
+              className="h-10 w-10 rounded-full"
+            />
+          </Link>
         </div>
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-4">

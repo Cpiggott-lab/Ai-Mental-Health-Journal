@@ -44,7 +44,7 @@ export default function LandingPage() {
       </section>
 
       {/* Why It Works */}
-      <section className="py-40 px-6 max-w-4xl mx-auto">
+      <section className="py-20 px-6 max-w-4xl mx-auto">
         <h2 className="text-5xl font-semibold mb-8 text-center">
           Why Use This Journal
         </h2>
