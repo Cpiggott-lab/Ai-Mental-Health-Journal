@@ -1,12 +1,10 @@
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, context: any) {
+  const { id } = context.params;
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
@@ -21,7 +19,7 @@ export async function POST(
   }
 
   const entry = await prisma.journalEntry.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { user: true },
   });
 
@@ -33,9 +31,9 @@ export async function POST(
   }
 
   await prisma.journalEntry.update({
-    where: { id: params.id },
+    where: { id },
     data: { content },
   });
 
-  return NextResponse.redirect(new URL(`/journal/${params.id}`, req.url)); // ✅ FIXED
+  return NextResponse.redirect(new URL(`/journal/${id}`, req.url));
 }
