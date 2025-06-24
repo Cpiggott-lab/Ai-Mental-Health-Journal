@@ -24,7 +24,13 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/lib/supabaseClient.js"
+  ],
   "exclude": [
     "node_modules",
     "postcss.config.js",
