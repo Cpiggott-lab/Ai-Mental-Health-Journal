@@ -1,22 +1,19 @@
-// SSR
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import DeleteClientWrapper from "@/components/DeleteClientWrapper";
 
-interface PageProps {
+type PageProps = {
   params: {
     id: string;
   };
-}
+};
 
 //SEO
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const entry = await prisma.journalEntry.findUnique({
-    where: { id: params.id },
+    where: { id: props.params.id },
   });
 
   if (!entry) return {};
@@ -44,7 +41,6 @@ export default async function JournalEntryPage({ params }: PageProps) {
       <p className="text-sm text-gray-400">
         {new Date(entry.createdAt).toLocaleString()}
       </p>
-
       <p className="text-xl mt-4 whitespace-pre-line">{entry.content}</p>
 
       {entry.summary && (
