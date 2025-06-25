@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import Providers from "./providers";
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+import { authOptions } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

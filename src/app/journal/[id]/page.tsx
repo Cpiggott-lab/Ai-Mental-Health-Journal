@@ -1,47 +1,43 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+// SSR
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import ConfirmModal from "@/components/ConfirmModal";
+import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import DeleteClientWrapper from "@/components/DeleteClientWrapper";
 
-export default function SingleJournalEntry({
-  params: paramsPromise,
+type Props = {
+  params: { id: string };
+};
+
+// SEO
+export async function generateMetadata({
+  params,
 }: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = use(paramsPromise);
-  const router = useRouter();
-  const [entry, setEntry] = useState<any>(null);
-  const [showModal, setShowModal] = useState(false);
+  params: { id: string };
+}): Promise<Metadata> {
+  const entry = await prisma.journalEntry.findUnique({
+    where: { id: params.id },
+  });
 
-  useEffect(() => {
-    (async () => {
-      const res = await fetch(`/api/journal/${params.id}`);
-      const data = await res.json();
-      setEntry(data);
-    })();
-  }, [params.id, router]);
+  if (!entry) return {};
 
-  const handleDelete = async () => {
-    const res = await fetch(`/api/journal/${params.id}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      router.push("/journal");
-    } else {
-      alert("Failed to delete entry.");
-    }
+  return {
+    title: `Journal Entry – ${new Date(entry.createdAt).toDateString()}`,
+    description: entry.summary || entry.content.slice(0, 100),
   };
+}
 
-  if (status === "loading" || !entry)
-    return <p className="text-center py-10 text-gray-500">Loading...</p>;
+export default async function JournalEntryPage({ params }: Props) {
+  const entry = await prisma.journalEntry.findUnique({
+    where: { id: params.id },
+  });
+
+  if (!entry) return notFound();
 
   const affirmations = entry.affirmations ? JSON.parse(entry.affirmations) : [];
   const suggestions = entry.suggestions ? JSON.parse(entry.suggestions) : [];
   const followUps = entry.followUps ? JSON.parse(entry.followUps) : [];
-  const mood = entry.mood ? JSON.parse(entry.mood) : null;
+
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <p className="text-sm text-gray-400">
@@ -56,7 +52,6 @@ export default function SingleJournalEntry({
             Mental Health Summary
           </h2>
           <p className="mb-4">{entry.summary}</p>
-          {/* add in mood */}
 
           <h3 className="text-md font-semibold text-green-700 mb-1">
             Positive Affirmations
@@ -76,7 +71,6 @@ export default function SingleJournalEntry({
             ))}
           </ul>
 
-          {/* Follow up questions. */}
           <h3 className="text-md font-semibold text-purple-700 mt-4">
             Follow-Up Questions
           </h3>
@@ -96,12 +90,7 @@ export default function SingleJournalEntry({
           Edit this entry
         </Link>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="text-sm text-red-600 hover:underline"
-        >
-          Delete
-        </button>
+        <DeleteClientWrapper id={params.id} />
 
         <Link
           href="/journal"
@@ -110,14 +99,6 @@ export default function SingleJournalEntry({
           ← Back to Journal
         </Link>
       </div>
-
-      <ConfirmModal
-        open={showModal}
-        title="Confirm Deletion"
-        message="Are you sure you want to delete this journal entry?"
-        onConfirm={handleDelete}
-        onCancel={() => setShowModal(false)}
-      />
     </div>
   );
 }

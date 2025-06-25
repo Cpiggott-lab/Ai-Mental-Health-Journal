@@ -1,13 +1,43 @@
-"use client";
+//SSR implemented by removing the 'use client' which makes the page render on the server side, replacing useSession with getServerSession.
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../lib/auth";
 import dashboardImage from "../../public/Journal-Dashboard.png";
 import newEntryImage from "../../public/New-Entry-Transparent background.png";
 import journalSummaryImage from "../../public/Journal-Summary-Transparent.png";
 
-export default function LandingPage() {
-  const { data: session } = useSession();
+// The SEO metadata added for optimization.
+export const metadata = {
+  metadataBase: new URL("https://ai-mental-health-journal.vercel.app"),
+  title: "Mental Health Journal | Reflect. Understand. Grow.",
+  description:
+    "AI-powered journaling to improve mental health and emotional clarity.",
+  openGraph: {
+    title: "Mental Health Journal",
+    description:
+      "AI-powered journaling to improve mental health and emotional clarity.",
+    url: "https://ai-mental-health-journal.vercel.app",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Mental Health Journal App Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mental Health Journal",
+    description: "Improve your mental well-being with AI-powered journaling.",
+    images: ["/og-image.png"],
+  },
+};
+
+// for SSR, we use getServerSession to check if the user is authenticated and add async to the function.
+export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
 
   return (
     <main className="min-h-screen flex flex-col bg-white text-gray-800">
