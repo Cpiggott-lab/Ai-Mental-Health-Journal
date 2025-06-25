@@ -5,16 +5,16 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import DeleteClientWrapper from "@/components/DeleteClientWrapper";
 
-type Props = {
-  params: { id: string };
-};
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
 
-// SEO
+//SEO
 export async function generateMetadata({
   params,
-}: {
-  params: { id: string };
-}): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const entry = await prisma.journalEntry.findUnique({
     where: { id: params.id },
   });
@@ -27,7 +27,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function JournalEntryPage({ params }: Props) {
+//SSR
+export default async function JournalEntryPage({ params }: PageProps) {
   const entry = await prisma.journalEntry.findUnique({
     where: { id: params.id },
   });
